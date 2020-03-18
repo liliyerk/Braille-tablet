@@ -1,12 +1,23 @@
-chartobraille = {'1': '⠼⠁', '2': '⠼⠃', '3': '⠼⠉', '4': '⠼⠙', '5': '⠼⠑',  '6': '⠼⠋', '7': '⠼⠛', '8': '⠼⠓',
-                '9': '⠼⠊','0': '⠼⠚', 'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
-                'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
-                'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵',}
+import json
+punctobraille = {}
+with open ('punctobraille.json') as data_file:
+    punctobraille = json.load(data_file)
+numtobraille = {}
+with open ('numtobraille.json') as data_file:
+    numtobraille = json.load(data_file)
+alphatobraille = {}
+with open ('alphatobraille.json') as data_file:
+    alphatobraille = json.load(data_file)
 text = input()
 newtext = ""
 for char in text:
     if char == ' ':
         newtext += ' '
         continue
-    newtext += chartobraille[char]
+    if char.lower() in "abcdefghijklmnopqrstuvwxyz":
+        newtext += alphatobraille[char]
+    if char in "1234567890":
+        newtext += numtobraille[char]
+    if char in ",;:.!()“”‘’?/":
+        newtext += punctobraille[char]
 print(newtext)
