@@ -1,23 +1,26 @@
-import json
-punctobraille = {}
-with open ('punctobraille.json') as data_file:
-    punctobraille = json.load(data_file)
-numtobraille = {}
-with open ('numtobraille.json') as data_file:
-    numtobraille = json.load(data_file)
-alphatobraille = {}
-with open ('alphatobraille.json') as data_file:
-    alphatobraille = json.load(data_file)
-text = input()
-newtext = ""
-for char in text:
-    if char == ' ':
-        newtext += ' '
-        continue
-    if char.lower() in "abcdefghijklmnopqrstuvwxyz":
-        newtext += alphatobraille[char]
-    if char in "1234567890":
-        newtext += numtobraille[char]
-    if char in ",;:.!()“”‘’?/":
-        newtext += punctobraille[char]
-print(newtext)
+    with open('punctobraille.json') as data_file:
+        punctobraille = json.load(data_file)
+
+    with open('numtobraille.json') as data_file:
+        numtobraille = json.load(data_file)
+
+    with open('alphatobraille.json') as data_file:
+        alphatobraille = json.load(data_file)
+
+    text = input()
+    translatedtext = ""
+
+    for char in text:
+        if char == ' ':
+            translatedtext += ' '
+            continue
+        if char.lower() in "abcdefghijklmnopqrstuvwxyz":
+            translatedtext += alphatobraille[char]
+        if char in "1234567890":
+            translatedtext += numtobraille[char]
+        if char in ",;:.!()“”‘’?/":
+            translatedtext += punctobraille[char]
+
+    file = open("translatedtext.json", "w")
+    file.write(json.dumps(translatedtext))
+    file.close()
