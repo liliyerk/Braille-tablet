@@ -3,65 +3,95 @@ import winsound
 import json
 
 
-def translate_text():
-    with open('punctobraille.json') as data_file:
-        punctobraille = json.load(data_file)
+class Tablet:
 
-    with open('numtobraille.json') as data_file:
-        numtobraille = json.load(data_file)
+    def __init__(self, cell_amount_hor, cell_amount_ver):
+        self.cell_amount_hor = cell_amount_hor
+        self.cell_amount_ver = cell_amount_ver
 
-    with open('alphatobraille.json') as data_file:
-        alphatobraille = json.load(data_file)
-
-    text = input()
-    translatedtext = ""
-
-    for char in text:
-        if char == ' ':
-            translatedtext += ' '
-            continue
-        if char.lower() in "abcdefghijklmnopqrstuvwxyz":
-            translatedtext += alphatobraille[char]
-        if char in "1234567890":
-            translatedtext += numtobraille[char]
-        if char in ",;:.!()“”‘’?/":
-            translatedtext += punctobraille[char]
-
-    file = open("translatedtext.json", "w")
-    file.write(json.dumps(translatedtext))
-    file.close()
+    def get_char_capacity(self):
+        char_capacity = self.cell_amount_ver * self.cell_amount_hor
+        return char_capacity
 
 
-def display_page():
-    with open("translatedtext.json") as file:
-        translatedtext = json.load(file)
-    translatedtext = translatedtext.split()
-    char_count = 0
-    for word in translatedtext:
-        char_count += len(word) + 1
-    translatedtext = " ".join(translatedtext)
-    char_index = 0
-    page = []
+class Book:
+    def __init__(self, text, ):
+        self.text = text
 
-    def turnon():
+        self.char_index = 0
+        self.page = []
+
+    def set_dimension(self, tablet):
+        self.tablet = tablet
+
+    def char_capacity(self):
+        char_capacity = tablet.get_char_capacity()
+        return char_capacity
+
+    def translate_text(self):
+        with open('punctobraille.json') as data_file:
+            punctobraille = json.load(data_file)
+
+        with open('numtobraille.json') as data_file:
+            numtobraille = json.load(data_file)
+
+        with open('alphatobraille.json') as data_file:
+            alphatobraille = json.load(data_file)
+
+        translatedtext = ""
+
+        for char in self.text:
+            if char == ' ':
+                translatedtext += ' '
+                continue
+            if char.lower() in "abcdefghijklmnopqrstuvwxyz":
+                translatedtext += alphatobraille[char]
+            if char in "1234567890":
+                translatedtext += numtobraille[char]
+            if char in ",;:.!()“”‘’?/":
+                translatedtext += punctobraille[char]
+
+        file = open("translatedtext.json", "w")
+        file.write(json.dumps(translatedtext))
+        file.close()
+
+    def count_char(self):
+        self.translate_text()
+        with open("translatedtext.json") as file:
+            translatedtext = json.load(file)
+        translatedtext = translatedtext.split()
+        char_count = 0
+        for word in translatedtext:
+            char_count += len(word) + 1
+        return char_count
+
+    def get_translated_text(self):
+        self.translate_text()
+        with open("translatedtext.json") as file:
+            translatedtext = json.load(file)
+        return translatedtext
+
+    def turn_on(self):
         winsound.Beep(200, 300)
-        nonlocal char_index
-        nonlocal page
+        char_capacity = self.char_capacity()
+        translatedtext = self.get_translated_text()
+        char_count = self.count_char()
+        page = self.page
         with open('char_index.json') as index:
             char_index = json.load(index)
         if char_index == 0:
-            if char_index + 7 < char_count:
-                if translatedtext[char_index + 7] == " ":
-                    print(translatedtext[char_index: char_index + 7])
-                    page.append(translatedtext[char_index: char_index + 7])
-                    char_index = char_index + 7
+            if char_index + char_capacity < char_count:
+                if translatedtext[char_index + char_capacity] == " ":
+                    print(translatedtext[char_index: char_index + char_capacity])
+                    page.append(translatedtext[char_index: char_index + char_capacity])
+                    self.char_index = char_index + char_capacity
                 else:
                     i = 1
-                    while translatedtext[char_index + 7 - i] != " ":
+                    while translatedtext[char_index + - i] != " ":
                         i = i + 1
-                    print(translatedtext[char_index: char_index + 7 - i])
-                    page.append(translatedtext[char_index: char_index + 7 - i])
-                    char_index = char_index + 7 - i
+                    print(translatedtext[char_index: char_index + char_capacity - i])
+                    page.append(translatedtext[char_index: char_index + char_capacity - i])
+                    self.char_index = char_index + char_capacity - i
 
             else:
                 print(translatedtext[char_index:])
@@ -70,42 +100,45 @@ def display_page():
                 page = json.load(file)
             print(page[-1])
 
-    def nextpage():
+    def next_page(self):
         winsound.Beep(400, 300)
-        nonlocal char_index
-        nonlocal page
+        char_capacity = self.char_capacity()
+        translatedtext = self.get_translated_text()
+        char_count = self.count_char()
+        char_index = self.char_index
+        page = self.page
         if char_index != char_count:
-            if char_index + 7 < char_count:
-                if translatedtext[char_index + 7] == " ":
-                    print(translatedtext[char_index: char_index + 7])
-                    page.append(translatedtext[char_index: char_index + 7])
-                    char_index = char_index + 7
+            if char_index + char_capacity < char_count:
+                if translatedtext[char_index + char_capacity] == " ":
+                    print(translatedtext[char_index: char_index + char_capacity])
+                    page.append(translatedtext[char_index: char_index + char_capacity])
+                    self.char_index = char_index + char_capacity
                 else:
                     i = 1
-                    while translatedtext[char_index + 7 - i] != " ":
+                    while translatedtext[char_index + char_capacity - i] != " ":
                         i = i + 1
-                    print(translatedtext[char_index: char_index + 7 - i])
-                    page.append(translatedtext[char_index: char_index + 7 - i])
-                    char_index = char_index + 7 - i
+                    print(translatedtext[char_index: char_index + char_capacity - i])
+                    page.append(translatedtext[char_index: char_index + char_capacity - i])
+                    self.char_index = char_index + char_capacity - i
             else:
                 print(translatedtext[char_index:])
                 page.append(translatedtext[char_index:])
-                char_index = char_count
+                self.char_index = char_count
 
-    def previouspage():
+    def previous_page(self):
         winsound.Beep(600, 300)
-        nonlocal char_index
-        nonlocal page
+        char_index = self.char_index
+        page = self.page
         if len(page) != 0:
             if page[-1] != page[0]:
-                char_index = char_index - len(page[-1])
+                self.char_index = char_index - len(page[-1])
                 page.remove(page[-1])
                 print(page[-1])
 
-    def turnoff():
+    def turn_off(self):
         winsound.Beep(300, 300)
-        nonlocal char_index
-        nonlocal page
+        char_index = self.char_index
+        page = self.page
         file = open("char_index.json", "w")
         file.write(json.dumps(char_index))
         file.close()
@@ -113,30 +146,55 @@ def display_page():
         file.write(json.dumps(page))
         file.close()
 
-    root = Tk()
 
-    topframe = Frame(root)
-    topframe.pack()
-    bottomframe = Frame(root)
-    bottomframe.pack(side=BOTTOM)
+class Buttons:
+    def __init__(self, root):
+        self.root = root
 
-    button1 = Button(bottomframe, text="Next Page", fg="red", command=nextpage)
-    button2 = Button(bottomframe, text="Previous Page", fg="green", command=previouspage)
-    button3 = Button(topframe, text="Turn Off", fg="purple", command=turnoff)
-    button4 = Button(topframe, text="Turn On", fg="blue", command=turnon)
+        topframe = Frame(root)
+        topframe.pack()
+        bottomframe = Frame(root)
+        bottomframe.pack(side=BOTTOM)
 
-    button1.pack(side=LEFT)
-    button2.pack(side=LEFT)
-    button3.pack(side=LEFT)
-    button4.pack(side=LEFT)
+        button1 = Button(bottomframe, text="Next Page", fg="red", command=self.next_page)
+        button2 = Button(bottomframe, text="Previous Page", fg="green", command=self.previous_page)
+        button3 = Button(topframe, text="Turn Off", fg="purple", command=self.turn_off)
+        button4 = Button(topframe, text="Turn On", fg="blue", command=self.turn_on)
 
-    root.mainloop()
+        button1.pack(side=LEFT)
+        button2.pack(side=LEFT)
+        button3.pack(side=LEFT)
+        button4.pack(side=LEFT)
 
+    def next_page(self):
+        book.next_page()
+        return
 
-def main():
-    print("Hi, please input text")
-    translate_text()
-    display_page()
+    def previous_page(self):
+        book.previous_page()
+        return
 
+    def turn_on(self):
+        book.turn_on()
+        return
 
-main()
+    def turn_off(self):
+        book.turn_off()
+        return
+
+    def set_book(self, book):
+        self.book = book
+
+print("Please, input the book text")
+book_text = input()
+book = Book(book_text)
+print("Please, input amount of characters horizontally")
+h = int(input())
+print("Please, input amount of characters vertically")
+v = int(input())
+tablet = Tablet(h, v)
+book.set_dimension(tablet)
+root1 = Tk()
+a = Buttons(root1)
+a.set_book(book)
+root1.mainloop()
